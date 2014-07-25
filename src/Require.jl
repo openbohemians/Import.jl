@@ -8,30 +8,26 @@ end
 
 function complete(path::String)
 	for p in completions(path)
-		if ispath(p) return p end
+		ispath(p) && return p
 	end
 	error("$path can not be completed to a real file")
 end
 
 function search(path::String, base::String)
-	dir = base
-	while true
-		paths = map(completions(path)) do x
-			"$dir/dependencies/$x"
-		end
-		for p in paths
-			if ispath(p) return p end
-		end
-		@assert(dir != "/", "$path not installed in $base")
-		dir = dirname(dir)
+	for p in completions(path)
+		p = "$base/dependencies/$p"
+		ispath(p) && return p
 	end
+	@assert(base != "/", "$path not installed")
+	search(path, dirname(base))
 end
 
 function completions(path::String)
-	# Did they end it without an extension
-	if ismatch(r"\.jl$", path) return [path] end
-	# Is it an explicit directory
-	if ismatch(r"\/$", path) return ["$(path)index.jl"] end
+	# already complete
+	ismatch(r"\.jl$", path) && return [path]
+	# explicitly a dir
+	ismatch(r"\/$", path) && return ["$(path)index.jl"]
+	# could be a file or a dir
 	["$(path).jl", "$(path)/index.jl"]
 end
 
