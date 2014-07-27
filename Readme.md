@@ -12,7 +12,7 @@ git clone https://github.com/jkroso/Require.jl.git `julia -e 'print(Pkg.dir())'`
 Then in the entry file to your app:
 
 ```julia
-import Require.require
+import Require: require, @require
 ```
 
 ## API
@@ -24,3 +24,12 @@ Load a file as a module. If another module has already required the file `path` 
 - Absolute path e.g "/a/file.jl"
 - Relative path: e.g. "./sibling", "../aunty". These paths are resolved relative to the file making the call to `require`
 - Module path: e.g. "Http", "Graphics". These are like relative paths except instead of looking directly in the calling files directory it looks inside a special folder named "dependencies". This provides a nice place to install the 3rd party dependencies your module requires. e.g if "/a/file.jl" was to `require` "Http" the first place the system would check is "/a/dependencies/Http". If it doesn't find anything there it recurs up a directory and tries again until it reaches the top level directory. If it can't find a match it throws an error.
+
+### @require(path::String, names...)
+
+The `@require` macro makes it easy to pull in just the variables of another module that you want.
+
+```julia
+@require "http" get post
+get("google.com")
+```
