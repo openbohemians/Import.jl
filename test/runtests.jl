@@ -31,3 +31,12 @@ ab = require("a/b")
 @test a == 1
 @test b == 2
 @test c == 3
+
+# aliasing
+
+@require "a" a => f b c
+@test f == 1
+@require "a" a=>f b=>g c=>h
+@test f == 1
+@test g == 2
+@test h == 3

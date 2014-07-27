@@ -56,7 +56,15 @@ macro require(path::String, names...)
 	req = :(require($path))
 	isempty(names) && return req
 	req = :(begin m = $req end)
-	append!(req.args, [:($(esc(n)) = m.$n) for n in names])
+	for n in names
+		if isa(n, Expr)
+			@assert n.head == symbol("=>")
+			push!(req.args, :($(esc(n.args[2])) = m.$(n.args[1])))
+		else
+			@assert isa(n, Symbol)
+			push!(req.args, :($(esc(n)) = m.$n))
+		end
+	end
 	push!(req.args, :m)
 	req
 end
