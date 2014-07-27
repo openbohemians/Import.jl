@@ -1,4 +1,4 @@
-import Require.require
+import Require: require, @require
 using Base.Test
 
 a = require("a")
@@ -19,9 +19,15 @@ ab = require("a/b")
 @test ab.a == "secret"
 
 @test is(require("a/b"), require("a/b"))
-
 @test is(require("a/c").a, require("a/b"))
-
 @test is(require("c").a, require("b"))
 
 @test_throws ErrorException require("casper")
+
+# macro
+
+@test is(a, @require("a"))
+@require "a" a b c
+@test a == 1
+@test b == 2
+@test c == 3

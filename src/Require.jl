@@ -36,18 +36,29 @@ cache = Dict{String,Module}()
 function require(path::String, base::String)
 	name = realpath(resolve(path, base))
 	haskey(cache, name) && return cache[name]
-	sym = symbol("_" * string(gensym())[3:end])
-	ast = parse("""module $sym
-		import Require
-		require(path::String) = Require.require(path, "$(dirname(name))")
+	sym = symbol(name)
+	ast = Expr(:module, true, sym, parse("""begin
+		import Require: @require, require
 		$(readall(name))
-	end""")
+	end"""))
 	eval(ast)
 	cache[name] = eval(sym)
 end
 
 function require(path::String)
-	require(path, dirname(@__FILE__()))
+	base = dirname(string(current_module())[9:end])
+	if isempty(base) base = @__FILE__() end
+	if is(nothing, base) base = pwd() end
+	require(path, base)
+end
+
+macro require(path::String, names...)
+	req = :(require($path))
+	isempty(names) && return req
+	req = :(begin m = $req end)
+	append!(req.args, [:($(esc(n)) = m.$n) for n in names])
+	push!(req.args, :m)
+	req
 end
 
 end # module
