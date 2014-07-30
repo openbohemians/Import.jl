@@ -1,7 +1,7 @@
 
 # Require
 
-A better module system for Julia inspired by node's.
+A better module system for Julia inspired by node's. Julia's built in module system is OK mechanically but lacks some nice ideas from node. Firstly installing one module should never affect another. Julia uses one name-space for all its modules and uses one install folder so _all_ modules used within your app must have unique names which is not scalable and winds up discouraging innovation in the public domain. Node actually made the name-spacing mistake too but still had huge success thanks to getting the latter correct. Another thing node gets right is they wrap each file in an implicit module. Where as in Julia files are essentially meaningless; modules are named explicitly and within the code. This means that when you fork a project you have to change its name to avoid conflicts with the original. Nodes implicit module naming makes naming conflicts impossible.
 
 ## Installation
 
