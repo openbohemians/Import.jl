@@ -33,3 +33,10 @@ The `@require` macro makes it easy to pull in just the variables of another modu
 @require "http" get post
 get("google.com")
 ```
+
+To rename variables as they are imported you can use the `their_name => your_name` syntax.
+
+```julia
+@require "http" get => fetch
+fetch("google.com")
+```
