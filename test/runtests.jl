@@ -1,4 +1,3 @@
-import Require: require, @require
 using Base.Test
 
 a = require("a")

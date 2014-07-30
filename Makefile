@@ -4,6 +4,6 @@ install:
 	@julia -e 'Pkg.resolve()'
 
 test: install
-	@julia test/runtests.jl
+	@bin/julia test/runtests.jl
 
 .PHONY: install test
