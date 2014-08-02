@@ -1,4 +1,0 @@
-# wraps Julia so its as if this module system is built
-# in to the language
-
-julia -e "import Require;Require.require(\"$(realpath $@)\", \"/\")"
