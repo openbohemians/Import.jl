@@ -45,11 +45,12 @@ function require(path::String, base::String)
 	cache[name] = eval(sym)
 end
 
+entry = ""
+set_entry(path::String) = global entry = path
+
 function require(path::String)
 	base = dirname(string(current_module())[9:end])
-	if isempty(base)
-		base = isinteractive() ? pwd() : dirname(@__FILE__())
-	end
+	if isempty(base) base = entry end
 	require(path, base)
 end
 
