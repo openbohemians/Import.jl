@@ -39,3 +39,5 @@ ab = require("a/b")
 @test f == 1
 @test g == 2
 @test h == 3
+
+@require "eval"

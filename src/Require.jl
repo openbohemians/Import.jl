@@ -39,6 +39,7 @@ function require(path::String, base::String)
 	sym = symbol(name)
 	ast = Expr(:module, true, sym, parse("""begin
 		import Require: @require, require
+		eval(e) = Base.eval(current_module(), e)
 		$(readall(name))
 	end"""))
 	eval(ast)
