@@ -47,8 +47,9 @@ end
 
 function require(path::String)
 	base = dirname(string(current_module())[9:end])
-	if isempty(base) base = @__FILE__() end
-	if is(nothing, base) base = pwd() end
+	if isempty(base)
+		base = isinteractive() ? pwd() : dirname(@__FILE__())
+	end
 	require(path, base)
 end
 
