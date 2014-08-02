@@ -9,10 +9,11 @@ A better module system for Julia inspired by node's. Julia's built in module sys
 git clone https://github.com/jkroso/Require.jl.git `julia -e 'print(Pkg.dir())'`/Require
 ```
 
-Then in the entry file to your app:
+Then in your "~/.juliarc.jl" add:
 
 ```julia
-import Require: require, @require
+import Require: @require, require
+Require.set_entry(isinteractive() ? pwd() : dirname(joinpath(pwd(), ARGS[1])))
 ```
 
 ## API
