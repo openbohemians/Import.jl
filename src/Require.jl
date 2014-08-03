@@ -2,7 +2,7 @@ module Require
 
 function resolve(path::String, base::String)
 	path[1] == '/' && return complete(path)
-	ismatch(r"^\.+/", path) && return complete(joinpath(base, path))
+	ismatch(r"^\.+/?", path) && return complete(joinpath(base, path))
 	search(path, base)
 end
 
@@ -59,10 +59,15 @@ macro require(path::String, names...)
 	req = :(require($path))
 	isempty(names) && return req
 	req = :(begin m = $req end)
+	names = [x for x in names] # make array
 	for n in names
 		if isa(n, Expr)
-			@assert n.head == symbol("=>")
-			push!(req.args, :($(esc(n.args[2])) = m.$(n.args[1])))
+			if n.head == :macrocall
+				append!(names, n.args)
+			else
+				@assert n.head == symbol("=>")
+				push!(req.args, :($(esc(n.args[2])) = m.$(n.args[1])))
+			end
 		else
 			@assert isa(n, Symbol)
 			push!(req.args, :($(esc(n)) = m.$n))
