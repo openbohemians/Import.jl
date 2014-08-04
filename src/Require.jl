@@ -56,10 +56,15 @@ function require(path::String)
 end
 
 macro require(path::String, names...)
-	req = :(require($path))
-	isempty(names) && return req
-	req = :(begin m = $req end)
+	req = :(begin m = require($path) end)
 	names = [x for x in names] # make array
+	# default to importing everything
+	if isempty(names)
+		m = require(path)
+		names = Base.names(m, true)
+		mn = module_name(m)
+		filter!(n -> mn != n != :eval, names)
+	end
 	for n in names
 		if isa(n, Expr)
 			if n.head == :macrocall
