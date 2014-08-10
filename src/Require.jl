@@ -61,9 +61,9 @@ macro require(path::String, names...)
 	# default to importing everything
 	if isempty(names)
 		m = require(path)
-		names = Base.names(m, true)
-		mn = module_name(m)
-		filter!(n -> mn != n != :eval, names)
+		names = Base.names(m)
+		m = module_name(m)
+		filter!(n -> m != n, names)
 	end
 	for n in names
 		if isa(n, Expr)
