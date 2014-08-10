@@ -1,9 +1,8 @@
 
 install:
-	@ln -fs $$PWD `julia -e "Pkg.init();print(Pkg.dir())"`/Require
-	@julia -e 'Pkg.resolve()'
+	@ln -fs $$PWD `julia -e 'print(Pkg.dir("Require"))'`
 
-test: install
-	@bin/julia test/runtests.jl
+test:
+	@julia test/runtests.jl
 
 .PHONY: install test

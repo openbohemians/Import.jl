@@ -1,3 +1,4 @@
+import Require: require, @require
 using Base.Test
 
 a = require("a")
@@ -25,7 +26,11 @@ ab = require("a/b")
 
 # macro
 
-@test is(a, @require("a"))
+@require "a"
+@test a == 1
+@test b == 2
+@test_throws UndefVarError c
+
 @require "a" a b c
 @test a == 1
 @test b == 2
