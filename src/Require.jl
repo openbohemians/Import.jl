@@ -1,5 +1,7 @@
 module Require
 
+export @require
+
 function resolve(path::String, base::String)
 	path[1] == '/' && return complete(path)
 	ismatch(r"^\.+/?", path) && return complete(joinpath(base, path))

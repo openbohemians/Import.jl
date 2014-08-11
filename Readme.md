@@ -12,32 +12,38 @@ git clone https://github.com/jkroso/Require.jl.git `julia -e 'print(Pkg.dir())'`
 Then in your "~/.juliarc.jl" add:
 
 ```julia
-import Require: @require, require
+using Require
 Require.set_entry(isinteractive() ? pwd() : dirname(joinpath(pwd(), ARGS[1])))
 ```
 
 ## API
 
-### require(path::String)
+### @require(path::String, [names...])
 
-Load a file as a module. If another module has already required the file `path` refers to the same module object will be returned from the cache. Otherwise it will be wrapped in an implicit module scope and evaluated. There are three kinds of `path`s you can pass to `require`:
+Load a file as a module. If another module has already required the file `path` refers to the same module object will be returned from the cache. Otherwise it will be wrapped in an implicit module scope and evaluated. There are three kinds of `path`s you can pass to `@require`:
 
 - Absolute path e.g "/a/file.jl"
-- Relative path: e.g. "./sibling", "../aunty". These paths are resolved relative to the file making the call to `require`
-- Module path: e.g. "Http", "Graphics". These are like relative paths except instead of looking directly in the calling files directory it looks inside a special folder named "dependencies". This provides a nice place to install the 3rd party dependencies your module requires. e.g if "/a/file.jl" was to `require` "Http" the first place the system would check is "/a/dependencies/Http". If it doesn't find anything there it recurs up a directory and tries again until it reaches the top level directory. If it can't find a match it throws an error.
+- Relative path: e.g. "./sibling", "../aunty". These paths are resolved relative to the file making the call to `@require`
+- Module path: e.g. "Http", "Graphics". These are like relative paths except instead of looking directly in the calling files directory it looks inside a special folder named "dependencies". This provides a nice place to install the 3rd party dependencies your module requires. e.g if "/a/file.jl" was to `@require "Http"` the first place the system would check is `"/a/dependencies/Http"`. If it doesn't find anything there it recurs up a directory and tries again until it reaches the top level directory. If it can't find a match it throws an error
 
-### @require(path::String, names...)
+By default all exported variables from a module are imported
 
-The `@require` macro makes it easy to pull in just the variables of another module that you want.
+```julia
+@require "http"
+@assert get == @require("http").get
+```
+
+But its also easy to pull in just the variables you want
 
 ```julia
 @require "http" get post
-get("google.com")
+@assert get == @require("http").get
+@assert post == @require("http").post
 ```
 
-To rename variables as they are imported you can use the `their_name => your_name` syntax.
+To rename variables as they are imported you can use the `their_name => your_name` syntax
 
 ```julia
 @require "http" get => fetch
-fetch("google.com")
+@assert fetch == @require("http").get
 ```
