@@ -35,7 +35,7 @@ end
 
 cache = Dict{String,Module}()
 
-function require(path::String, base::String)
+function require(path::String, base::String; locals...)
 	name = realpath(resolve(path, base))
 	haskey(cache, name) && return cache[name]
 	sym = symbol(name)
@@ -44,6 +44,10 @@ function require(path::String, base::String)
 		eval(e) = Base.eval(current_module(), e)
 		$(readall(name))
 	end"""))
+	# define locals
+	for (key,value) in locals
+		unshift!(ast.args[3].args, :(const $key = $value))
+	end
 	eval(ast)
 	cache[name] = eval(sym)
 end
@@ -51,10 +55,10 @@ end
 entry = ""
 set_entry(path::String) = global entry = path
 
-function require(path::String)
+function require(path::String; locals...)
 	base = dirname(string(current_module())[9:end])
 	if isempty(base) base = entry end
-	require(path, base)
+	require(path, base; locals...)
 end
 
 macro require(path::String, names...)

@@ -46,3 +46,9 @@ ab = require("a/b")
 @test h == 3
 
 @require "eval"
+
+# locals
+
+locals = require("locals"; a=1, b=2)
+@test locals.a == 1
+@test locals.b == 2

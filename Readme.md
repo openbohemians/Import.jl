@@ -47,3 +47,20 @@ To rename variables as they are imported you can use the `their_name => your_nam
 @require "http" get => fetch
 @assert fetch == @require("http").get
 ```
+
+### require(path::String; locals...)
+
+Extending the global context isn't really possible in julia however its occasionally useful for creating DSLish things like test runners. The `require` function makes it possible to define variables within a module
+
+```julia
+Require.require("./mytests"; test=Base.Test.do_test)
+```
+
+If you want to define macros thats a little complicated due to syntax problems but still possible
+
+```julia
+using Base.Test
+Require.require("./mytests"; [
+  symbol("@test") => eval(symbol("@test"))
+]...)
+```
