@@ -1,1 +1,1 @@
-a = require("./b")
+a = Require.require("./b")

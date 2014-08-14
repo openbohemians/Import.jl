@@ -40,7 +40,7 @@ function require(path::String, base::String)
 	haskey(cache, name) && return cache[name]
 	sym = symbol(name)
 	ast = Expr(:module, true, sym, parse("""begin
-		import Require: @require, require
+		using Require
 		eval(e) = Base.eval(current_module(), e)
 		$(readall(name))
 	end"""))
