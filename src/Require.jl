@@ -44,9 +44,14 @@ function require(path::String, base::String; locals...)
 		eval(e) = Base.eval(current_module(), e)
 		$(readall(name))
 	end"""))
+	body = ast.args[3].args
+	# lift module wrapper so standard modules can be loaded
+	if length(body) == 6 && body[6].head == :module
+		splice!(body, 6, body[6].args[3].args)
+	end
 	# define locals
 	for (key,value) in locals
-		unshift!(ast.args[3].args, :(const $key = $value))
+		unshift!(body, :(const $key = $value))
 	end
 	eval(ast)
 	cache[name] = eval(sym)

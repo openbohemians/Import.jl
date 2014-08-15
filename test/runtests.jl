@@ -52,3 +52,8 @@ ab = require("a/b")
 locals = require("locals"; a=1, b=2)
 @test locals.a == 1
 @test locals.b == 2
+
+# legacy modules
+
+old = require("old")
+@test old.one == 1
