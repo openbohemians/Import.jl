@@ -13,7 +13,11 @@ Then in your "~/.juliarc.jl" add:
 
 ```julia
 using Require
-Require.set_entry(isinteractive() ? pwd() : dirname(joinpath(pwd(), ARGS[1])))
+if isinteractive()
+  Require.set_entry(pwd())
+else
+  Require.set_entry(dirname(realpath(joinpath(pwd(), ARGS[1]))))
+end
 ```
 
 ## API
