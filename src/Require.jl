@@ -61,7 +61,7 @@ entry = ""
 set_entry(path::String) = global entry = path
 
 function require(path::String; locals...)
-	base = dirname(string(current_module())[9:end])
+	base = dirname(string(module_name(current_module())))
 	if isempty(base) base = entry end
 	require(path, base; locals...)
 end
