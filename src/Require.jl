@@ -17,7 +17,7 @@ end
 
 function search(path::String, base::String)
 	for p in completions(path)
-		p = "$base/dependencies/$p"
+		p = "$base/deps/$p"
 		ispath(p) && return p
 	end
 	@assert(base != "/", "$path not installed")
