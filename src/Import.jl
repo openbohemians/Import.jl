@@ -1,6 +1,6 @@
 module Import
 
-  export @import
+  export load, @inport
 
   # The import macro imports exported references from a external module-file.
   # Imported module-files are cached, so if another module has already imported
@@ -52,7 +52,7 @@ module Import
   #
   # TODO: Assigned modules, e.g. `Foo = @import foo`.
   #
-  macro require(names...)
+  macro inport(names...)
 	  names = [x for x in names] # make array
 
     path = shift!(names)
@@ -90,18 +90,18 @@ module Import
   set_entry(path::String) = global entry = path
 
   #
-  function require(path::String; locals...)
+  function load(path::String; locals...)
 	  base = dirname(string(module_name(current_module())))
 	  if isempty(base)
       base = entry 
     end
-	  require(path, base; locals...)
+	  load(path, base; locals...)
   end
 
   cache = Dict{String,Module}()
 
   #
-  function require(path::String, base::String; locals...)
+  function load(path::String, base::String; locals...)
 	  name = realpath(resolve(path, base))
 	  haskey(cache, name) && return cache[name]
 	  sym = symbol(name)
@@ -125,7 +125,7 @@ module Import
 
   # Resolve a load path.
   function resolve(path::String, base::String)
-    if isabolsute(path)
+    if isabsolute(path)
       goodpath(meldpath(path))
     elseif isrelative(path)
       goodpath(meldpath(base, path))
@@ -140,7 +140,7 @@ module Import
     if ext == ""
       path = "$path.jl"
     end
-    return realpath(joinpath(base, path))
+    return joinpath(base, path)
   end
 
   # Meld path adds `.jl` extension if needed.
@@ -154,7 +154,7 @@ module Import
 
   # Is a path absolute? Absolute paths start with `/` or `~/`.
   function isabsolute(path::String)
-	  startwith(path, '/') || startwith(path, '~/')
+	  beginswith(path, "/") || beginswith(path, "~/")
   end
 
   # Is a path relative? Relative paths begin with `./` or `../`.
@@ -164,28 +164,28 @@ module Import
 
   # Resolve package path.
   function package(path::String, base::String)
-    m = match(r"^(\w*)[\](.*)$", path)
+    parts = split(path, '/')
 
-    name = m.captures[1]
-    rest = m.captures[2]
-
-    if isempty(rest)
+    name = parts[1]
+    if length(parts) > 1
+      rest = joinpath(parts[2:end]...)
+    else
       rest = name
     end
 
     if Pkg.installed(name)
       return realpath(joinpath(Pkg.dir(name), "$(rest).jl"))
     else
-      error("$name is not a package)
+      error("$name is not a package")
     end
   end
 
   # Return file path if found, otherwise report error.
   function goodpath(path)
-    if ispath(file)
-      return file
+    if ispath(path)
+      return realpath(path)
     else
-      error("$file can not be resolved to a real file")
+      error("$path can not be resolved to a real file")
     end
   end
 

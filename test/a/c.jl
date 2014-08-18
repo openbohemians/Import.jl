@@ -1,0 +1,1 @@
+a = Import.load("./b")
