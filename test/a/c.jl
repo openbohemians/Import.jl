@@ -1,1 +1,1 @@
-a = Import.load("./b")
+a = Import.encap("./b")

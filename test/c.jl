@@ -1,1 +1,1 @@
-a = Require.require("b")
+a = Import.encap("./b")

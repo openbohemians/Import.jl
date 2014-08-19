@@ -1,12 +1,12 @@
 module Import
 
-  export load, @inport
+  export encap, @imports
 
-  # The import macro imports exported references from a external module-file.
-  # Imported module-files are cached, so if another module has already imported
-  # it, the same module object will be returned from the cache. Otherwise the
-  # file's code will be wrapped in an implicit module scope, evaluated and
-  # added to the cache.
+  # The import macro makes avaialable exported references from an external
+  # module-file. Imported module-files are cached, so if another module has 
+  # already imported it, the same module object will be returned from the cache.
+  # Otherwise the file's code will be wrapped in an implicit module scope,
+  # evaluated and added to the cache.
   #
   # To to import a module-file from a package simply pass `@import` the package
   # name undecorated, e.g. `@import Foo`. This will look for a file by the name
@@ -31,7 +31,7 @@ module Import
   # on behavior.
   #
   # When a module-file is imported, by default all *exported* variables from
-  # are imported.
+  # the module-file are imported.
   # 
   #     @import "http"
   #     @assert get == @import("http").get
@@ -43,25 +43,46 @@ module Import
   #     @assert post == @import("http").post
   #
   # To rename variables as they are imported you can use the `name => new_name`
-  # syntax
+  # syntax.
   # 
   #     @import "http" get => fetch
   #     @assert fetch == @import("http").get
   #
-  # TODO: Use `:` after module name when selecting specific imports ?
+  # An optional `:` can be placed after the module-file name and before the
+  # specific names.
   #
-  # TODO: Assigned modules, e.g. `Foo = @import foo`.
+  #     @import "http" : get => fetch
   #
-  macro inport(names...)
+  # If you wish to import a module-file whole-clothe and give it a handle, use:
+  #
+  #     @import "Http" => http
+  #
+  # Then the module-file can be used as such:
+  #
+  #     http.get(...)
+  #     http.post(...)
+  #
+  # Alternatively assignment can be used with the underlying encapsulating
+  # function.
+  #
+  #     http = encap("Http")
+  #
+  # TODO: Is encap a good name, I shy away from import so not to imply that exports are bing added.
+  #
+  # TODO: I think we should require commas betweenthe names. e.g. `@import "foo": a, b=>x, c`
+  # 
+  # TODO: Assigned modules, e.g. `Foo = @import foo` is that possible ?
+  #
+  macro imports(names...)
 	  names = [x for x in names] # make array
 
     path = shift!(names)
 
-	  req = :(begin m = require($path) end)
+	  req = :(begin m = encap($path) end)
 
 	  # default to importing everything
 	  if isempty(names)
-		  m = require(path)
+		  m = encap(path)
 		  names = Base.names(m)
 		  m = module_name(m)
 		  filter!(n -> m != n, names)
@@ -86,27 +107,32 @@ module Import
 	  req
   end
 
-  entry = ""
-  set_entry(path::String) = global entry = path
+  #
+  cache = Dict{String,Module}()
 
   #
-  function load(path::String; locals...)
+  entry = ""
+
+  #
+  set_entry(path::String) = global entry = path
+
+
+  # Encapsulate a file as a module. Supports parametric encapsulation.
+  function encap(path::String; locals...)
 	  base = dirname(string(module_name(current_module())))
 	  if isempty(base)
       base = entry 
     end
-	  load(path, base; locals...)
+	  encap(path, base; locals...)
   end
 
-  cache = Dict{String,Module}()
-
   #
-  function load(path::String, base::String; locals...)
+  function encap(path::String, base::String; locals...)
 	  name = realpath(resolve(path, base))
 	  haskey(cache, name) && return cache[name]
 	  sym = symbol(name)
 	  ast = Expr(:module, true, sym, parse("""begin
-		  using Require
+		  using Import
 		  eval(e) = Base.eval(current_module(), e)
 		  $(readall(name))
 	  end"""))
@@ -130,7 +156,7 @@ module Import
     elseif isrelative(path)
       goodpath(meldpath(base, path))
     else
-      goodpath(package(path, base))
+      goodpath(pkgpath(path))
     end
   end
 
@@ -163,7 +189,7 @@ module Import
   end
 
   # Resolve package path.
-  function package(path::String, base::String)
+  function pkgpath(path::String)
     parts = split(path, '/')
 
     name = parts[1]
